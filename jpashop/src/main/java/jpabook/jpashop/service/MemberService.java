@@ -33,6 +33,12 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void update(Long id, String name) {
+        Member member = memberRepository.findOne(id); //영속상태
+        member.setName(name); //영속성컨텍스트 반영
+    }
+
     //회원 전체 조회
     public List<Member> findMembers() {
         return memberRepository.findAll();
