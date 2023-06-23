@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -59,6 +60,25 @@ public class OrderSimpleApiController {
             address = order.getDelivery().getAddress();
         }
     }
+    //v3. 엔티티를 조회해서 DTO로 변환하기(FETCH JOIN사용)
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> orderV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o->new SimpleOrderDto(o))
+                .collect(toList());
+        return result;
+    }
+
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
+    //위에서 만든 simple DTO클래스는 컨트롤러가 의존하고 있어서
+    //레포지토리에서 의존하게 만들기 위해서 따로 클래스를 만들어줌
+
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> orderV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
+    }
+
 }
 
 

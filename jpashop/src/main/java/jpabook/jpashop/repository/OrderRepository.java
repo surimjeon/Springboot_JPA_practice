@@ -2,6 +2,7 @@ package jpabook.jpashop.repository;
 
 import jpabook.jpashop.domain.Order;
 
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -95,6 +96,40 @@ public class OrderRepository {
         TypedQuery<Order> query = em.createQuery(cq).setMaxResults(1000);
         return query.getResultList();
     }
+
+
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                "select o from Order o"+
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class).getResultList();
+        }
+
+    public List<OrderSimpleQueryDto> findOrderDtos() {
+        return em.createQuery("select o from Order o" +
+                "join o.member m"+
+                "join o.delivery d", OrderSimpleQueryDto.class).getResultList();
+    }
+
+    public List<Order> findAllWithItem() {
+        return em.createQuery("select distinct o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery("select o from Order o" +
+                " join fetch o.member m" +
+                " join fetch o.delivery d", Order.class) //to1관계를 모두 fetch join
+                //orderitems는 orderDto에서 조회
+                .setFirstResult(offset) //index 1번부터
+                .setMaxResults(limit) //최대 개수
+                .getResultList();
+    }
+
 
 }
 
